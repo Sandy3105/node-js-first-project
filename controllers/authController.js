@@ -1,30 +1,17 @@
-const User = require('../models/User')
-const jwt = require('jsonwebtoken')
+const User = require("../models/User")
+const jwt  = require("jsonwebtoken")
 
-const maxAge = 3 * 24 * 60 * 60 * 1000;
+
+// creating jwt
+const maxAge = 2*24*60*60*1000;
 const createToken = (id)=>{
-
-    return jwt.sign({id}, 'secret',{
+    return jwt.sign({id},'secret',{
         expiresIn:maxAge
     })
 }
 
-module.exports.signup_get = (req, res)=>{
-    const token = req.cookies.jwt
-    if(token){
-        jwt.verify(token, "secret", (err, decodedToken)=>{
-            if(err){
-                res.render("signup")
-            }else{
-                res.redirect("/dashboard")
-            }
-        })
-    }else{
 
-        res.render('signup')
-    }
-}
-
+// ***************** Errors *********************
 const handleErrors = (err)=>{
     // console.log(err.message,err.code);
 
@@ -55,50 +42,25 @@ const handleErrors = (err)=>{
 
 }
 
-module.exports.signup_post = async (req, res)=>{
-    const {email, password} = req.body;
-    // console.log(email,password);
 
-    try{
-        const user = await User.create({
-            email,password
-        })
-
-        const token = createToken(user._id)
-        res.cookie('jwt', token, {httpOnly:true, maxAge:maxAge})
-        // res.cookie('jwt', token, {httpSecure:true})
-        res.status(201).json({user:user._id});
-
-
-        // res.status(201).json(user)
-    }catch(err){
-        // console.log(err);
-        const errors = handleErrors(err)
-        console.log(errors);
-        res.status(400).json({errors})
-    }
-
-   
-}
-
-module.exports.login_get = (req, res)=>{
+module.exports.signin_get = (req, res)=>{
     const token = req.cookies.jwt;
     if(token){
         jwt.verify(token, "secret",(err, decodedToken) =>{
             if(err){
-                res.render('login')
+                res.render('signin')
             }else{
-                res.redirect('/dashboard')
+                res.redirect('/dashboard1')
             }
         })
     }else{
-        res.render('login')
+        res.render('signin')
     }
     // res.render('login')
 }
 
-module.exports.login_post = async (req, res)=>{
-    const {email, password} = req.body;
+module.exports.signin_post = async (req, res)=>{
+    const {email, password} = req.body
     // console.log(email,password);
 
     try{
@@ -108,9 +70,8 @@ module.exports.login_post = async (req, res)=>{
 
         const token = createToken(user._id)
         res.cookie('jwt', token, {httpOnly:true, maxAge:maxAge})
-        // res.cookie('jwt', token, {httpSecure:true})
-        
-        res.status(200).json({user:user._id})
+        // res.cookie('jwt', token, {httpSecure:true})        
+        res.status(200).json({user:user});
     }catch(err){
         // console.log(err);
         const errors = handleErrors(err)
@@ -118,6 +79,45 @@ module.exports.login_post = async (req, res)=>{
         res.status(400).json({errors})
     }
 }
+
+
+
+module.exports.signup_get = (req, res)=>{
+    const token = req.cookies.jwt;
+    if(token){
+        jwt.verify(token, "secret", (err, decodedToken)=>{
+            if(err){
+                res.render("signup")
+            }else{
+                res.redirect("/dashboard1")
+            }
+        })
+    }else{
+
+        res.render('signup')
+    }
+}
+
+module.exports.signup_post = async (req, res)=>{
+    const {name, email, password} = req.body;
+
+    try{
+        const user = await User.create({
+            name, email, password
+        })
+
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {httpOnly:true, maxAge:maxAge});
+        res.status(200).json({user:user._id});
+    }catch(err){
+        console.log(err);
+        const errors = handleErrors(err)
+        res.status(400).json({errors})
+
+    }
+}
+
+
 
 module.exports.logout = async (req, res)=>{
     res.cookie("jwt",'',{ maxAge:1})

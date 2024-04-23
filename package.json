@@ -1,12 +1,12 @@
 {
-  "name": "travel-app",
+  "name": "crm",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "nodemon": "nodemon index.js",
-    "build:css": "tailwindcss build public/styles.css -o public/build/styles.css"
+    "start": "nodemon index.js"
+
   },
   "keywords": [],
   "author": "",

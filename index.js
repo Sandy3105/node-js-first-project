@@ -1,72 +1,67 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-// const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken')
-
-const authRoutes = require('./routes/authRoutes');
-
-const {requireAuth, checkUser} = require('./middlewares/authMiddlewares')
-
-const mongoose = require('mongoose');
-
-const app = express();
-
-// bodyParser should be used before initializing routes
-// Parse incoming request bodies
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
-
-app.use(cookieParser());
-
-app.use(express.json()); // must be used before initializing routes
-
-
-app.use(express.static('public'));
-
-app.set('view engine','ejs');
+// ******************* modules ***********************
+const express  = require("express")
+const mongoose  = require("mongoose")
+const jwt  = require("jsonwebtoken")
+const cookieParser  = require("cookie-parser")
+const authRoutes = require("./routes/authRoutes")
+const {requireAuth, checkUser} = require('./middlewares/authMiddleware')
 
 
 
-const dbURI = "mongodb://localhost:27017/travelapp";
 
-mongoose.connect(dbURI, {
+
+// **************** Initializing express *****************
+const app = express()
+
+
+app.use(cookieParser())
+app.use(express.json())
+
+
+app.use(express.static('public'))
+app.set("view engine", "ejs")
+
+
+// ******************** db connection ************************
+const dbURI = "mongodb://localhost:27017/crm";
+mongoose.connect(dbURI,{
     useNewUrlParser:true,
     useUnifiedTopology:true,
-    // useCreateIndex:true
 })
 .then((result) =>{
-    app.listen(5000, ()=>{
-        console.log("App is listening on port 5000")
+    app.listen(3000, ()=>{
+        console.log("CRM is running on port 3000");
     })
 })
 .catch( (err)=>{
-    console.log(err)
+    console.log(err);
 })
 
-
-
- 
 app.get('*',checkUser )
 
-app.get('/',(req, res)=>{
+// ***************** requests ********************************
+app.get("/", (req, res)=>{
     const token = req.cookies.jwt;
     if(token){
         jwt.verify(token, "secret",(err, decodedToken) =>{
             if(err){
-                res.redirect('/login')
+                res.redirect('/signin')
             }else{
-                res.redirect('/dashboard')
+                res.redirect('/dashboard1')
             }
         })
     }else{
-        res.redirect('/login')
+        res.redirect('/signin')
     }
-});
+})
 
-app.get("/dashboard", requireAuth,(req, res)=>{
-    res.render('dashboard')
-});
 
-app.use(authRoutes);
-// "user is not defined" error on login signup route when addded header to them which uses user variable ?
-// because, app.use(authRoutes); is not after teh routes in index page
+app.get("/dashboard1",requireAuth, (req, res)=>{
+    res.render("dashboard1")
+})
+
+
+
+
+
+app.use(authRoutes)
